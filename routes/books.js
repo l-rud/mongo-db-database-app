@@ -9,7 +9,7 @@ const books = require('../data/books.js');
 // Creating a GET route for the entire books database
 // This would be impractical in larger data sets(?)
 // GET /api/books
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const links = [
     {
       href: 'books/:id',
@@ -18,7 +18,32 @@ router.get('/', (req, res) => {
     },
   ];
 
+  // Readning books from books collection of home_library_catalog MongoDB database
+  const MongoClient = require('mongodb').MongoClient;
+  const dotenv = require('dotenv');
+  dotenv.config();
+  
+  // Variable for storing the connection string from our .env file
+  const connectionString = process.env.ATLAS_URI || '8000';
+  // Creating a new instance of the MongoClient
+  const client = new MongoClient(connectionString);
+  
+  let conn;
+  try {
+    // Connecting to your cluster
+    conn = await client.connect();
+    console.log('Successfully connected to Mongo!');
+  } catch (e) {
+    console.log(e);
+  }
+  
+  const db = conn.db('home_library_catalog');
+  const booksCollection = await db.collection('books');
+  const books = await booksCollection.find().toArray();
+
   res.json({ books, links });
+
+  client.close();
 });
 
 // Creating a simple GET route for individual book,

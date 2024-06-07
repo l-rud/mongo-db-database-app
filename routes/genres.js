@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+//Importing the genres data from database file
+const genres = require('../data/genres.js');
 
 // BASE PATH
 // - /api/genres
@@ -22,7 +24,7 @@ router.get('/', async (req, res) => {
   dotenv.config();
   
   // Variable for storing the connection string from our .env file
-  const connectionString = process.env.ATLAS_URI || '';
+  const connectionString = process.env.ATLAS_URI || '8000';
   // Creating a new instance of the MongoClient
   const client = new MongoClient(connectionString);
   
