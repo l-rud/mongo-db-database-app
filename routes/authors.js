@@ -71,10 +71,10 @@ router.get('/:id', (req, res, next) => {
 
 //Creating a author (POST)
 // POST /api/authors
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // Within the POST request route, we create a new
   // author with the data given by the client
-  if (req.body.name && req.body.description) {
+  if (req.body.name && req.body.genreId) {
     if (authors.find((u) => u.name == req.body.name)) {
       res.json({ error: 'Author name already Taken' });
       return;
@@ -86,8 +86,37 @@ router.post('/', (req, res) => {
       description: req.body.description,
     };
 
-    authors.push(author);
-    res.json(authors[authors.length - 1]);
+    // authors.push(author);
+    // res.json(authors[authors.length - 1]);
+
+    // Readning authors from authors collection of home_library_catalog MongoDB database
+    const MongoClient = require('mongodb').MongoClient;
+    const dotenv = require('dotenv');
+    dotenv.config();
+  
+    // Variable for storing the connection string from our .env file
+    const connectionString = process.env.ATLAS_URI || '8000';
+    // Creating a new instance of the MongoClient
+    const client = new MongoClient(connectionString);
+  
+    let conn;
+    try {
+      // Connecting to your cluster
+      conn = await client.connect();
+      console.log('Successfully connected to Mongo!');
+    } catch (e) {
+      console.log(e);
+    }
+  
+    const db = conn.db('home_library_catalog');
+    const authorsCollection = await db.collection('authors');
+    
+    const newDocument = req.body;
+    const result = await authorsCollection.insertOne(newDocument);
+    res.json(result).status(204);
+
+    client.close();
+
   } else next(error(400, 'Insufficient Data'));
 });
 
