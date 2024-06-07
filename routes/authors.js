@@ -9,7 +9,7 @@ const authors = require('../data/authors.js');
 // Creating a GET route for the entire authors database
 // This would be impractical in larger data sets(?)
 // GET /api/authors
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const links = [
     {
       href: 'authors/:id',
@@ -18,7 +18,32 @@ router.get('/', (req, res) => {
     },
   ];
 
+  // Readning authors from authors collection of home_library_catalog MongoDB database
+  const MongoClient = require('mongodb').MongoClient;
+  const dotenv = require('dotenv');
+  dotenv.config();
+  
+  // Variable for storing the connection string from our .env file
+  const connectionString = process.env.ATLAS_URI || '8000';
+  // Creating a new instance of the MongoClient
+  const client = new MongoClient(connectionString);
+  
+  let conn;
+  try {
+    // Connecting to your cluster
+    conn = await client.connect();
+    console.log('Successfully connected to Mongo!');
+  } catch (e) {
+    console.log(e);
+  }
+  
+  const db = conn.db('home_library_catalog');
+  const authorsCollection = await db.collection('authors');
+  const authors = await authorsCollection.find().toArray();
+
   res.json({ authors, links });
+
+  client.close();
 });
 
 // Creating a simple GET route for individual authors,
@@ -51,7 +76,7 @@ router.post('/', (req, res) => {
   // author with the data given by the client
   if (req.body.name && req.body.description) {
     if (authors.find((u) => u.name == req.body.name)) {
-      res.json({ error: 'author name already Taken' });
+      res.json({ error: 'Author name already Taken' });
       return;
     }
 
