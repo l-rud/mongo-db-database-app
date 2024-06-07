@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-//Importing the genres data from database file
-const genres = require('../data/genres.js');
 
 // BASE PATH
 // - /api/genres
@@ -9,7 +7,7 @@ const genres = require('../data/genres.js');
 // Creating a GET route for the entire genres database
 // This would be impractical in larger data sets(?)
 // GET /api/genres
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const links = [
     {
       href: 'genres/:id',
@@ -18,7 +16,32 @@ router.get('/', (req, res) => {
     },
   ];
 
+  // Readning genres from genres collection of home_library_catalog MongoDB database
+  const MongoClient = require('mongodb').MongoClient;
+  const dotenv = require('dotenv');
+  dotenv.config();
+  
+  // Variable for storing the connection string from our .env file
+  const connectionString = process.env.ATLAS_URI || '';
+  // Creating a new instance of the MongoClient
+  const client = new MongoClient(connectionString);
+  
+  let conn;
+  try {
+    // Connecting to your cluster
+    conn = await client.connect();
+    console.log('Successfully connected to Mongo!');
+  } catch (e) {
+    console.log(e);
+  }
+  
+  const db = conn.db('home_library_catalog');
+  const genresCollection = await db.collection('genres');
+  const genres = await genresCollection.find().toArray();
+
   res.json({ genres, links });
+
+  client.close();
 });
 
 // Creating a simple GET route for individual genres,

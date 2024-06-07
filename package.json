@@ -1,12 +1,11 @@
 {
   "name": "home-library-catalog",
   "version": "1.0.0",
-  "description": "Express server application",
+  "description": "SBA 319: MongoDB Database Application",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "seed": "nodemon seed.mjs"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "L. Rud",
