@@ -75,7 +75,7 @@ router.post('/', async (req, res) => {
   // Within the POST request route, we create a new
   // author with the data given by the client
   if (req.body.name && req.body.genreId) {
-    if (authors.find((u) => u.name == req.body.name)) {
+    /*if (authors.find((u) => u.name == req.body.name)) {
       res.json({ error: 'Author name already Taken' });
       return;
     }
@@ -86,10 +86,11 @@ router.post('/', async (req, res) => {
       description: req.body.description,
     };
 
-    // authors.push(author);
-    // res.json(authors[authors.length - 1]);
+    authors.push(author);
+    res.json(authors[authors.length - 1]);
+    */
 
-    // Readning authors from authors collection of home_library_catalog MongoDB database
+    // Posting an author to authors collection of home_library_catalog MongoDB database
     const MongoClient = require('mongodb').MongoClient;
     const dotenv = require('dotenv');
     dotenv.config();
@@ -121,10 +122,10 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH /api/authors/:id
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
   // Within the PATCH request route, we allow the client
   // to make changes to an existing author in the database
-  const author = authors.find((u, i) => {
+  /*const author = authors.find((u, i) => {
     if (u.id == req.params.id) {
       // iterating through the author object and updating each property with the data that was sent by the client
       for (const key in req.body) {
@@ -133,9 +134,45 @@ router.patch('/:id', (req, res) => {
       return true;
     }
   });
+  */
 
-  if (author) res.json(author);
-  else next();
+  // Posting an author to authors collection of home_library_catalog MongoDB database
+  const MongoClient = require('mongodb').MongoClient;
+  const dotenv = require('dotenv');
+  dotenv.config();
+    
+  // Variable for storing the connection string from our .env file
+  const connectionString = process.env.ATLAS_URI || '8000';
+  // Creating a new instance of the MongoClient
+  const client = new MongoClient(connectionString);
+    
+  let conn;
+  try {
+    // Connecting to your cluster
+    conn = await client.connect();
+    console.log('Successfully connected to Mongo!');
+  } catch (e) {
+     console.log(e);
+  }
+    
+  const db = conn.db('home_library_catalog');
+  const authorsCollection = await db.collection('authors');
+      
+  const query = { id: parseInt(req.params.id) };
+  console.log(query);
+  const result = await authorsCollection.updateOne(query, {
+    $set: req.body,
+  });
+  
+  client.close();
+
+  if (!result) {
+    const err = new Error('Not Found');
+    err.status = 404;
+    throw err;
+  } else {
+    res.json(result).status(200);
+  }
 });
 
 // DELETE /api/authors/:id
