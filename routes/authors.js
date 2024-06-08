@@ -158,8 +158,8 @@ router.patch('/:id', async (req, res) => {
   const db = conn.db('home_library_catalog');
   const authorsCollection = await db.collection('authors');
       
-  const query = { id: parseInt(req.params.id) };
-  console.log(query);
+  const query = { id: Number(req.params.id) };
+
   const result = await authorsCollection.updateOne(query, {
     $set: req.body,
   });
@@ -176,9 +176,9 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /api/authors/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // The DELETE request route simply removes a resource
-  const author = authors.find((u, i) => {
+  /*const author = authors.find((u, i) => {
     if (u.id == req.params.id) {
       authors.splice(i, 1);
       return true;
@@ -187,6 +187,42 @@ router.delete('/:id', (req, res) => {
 
   if (author) res.json(author);
   else next();
+  */
+   // Deleting an author from authors collection of home_library_catalog MongoDB database
+   const MongoClient = require('mongodb').MongoClient;
+   const dotenv = require('dotenv');
+   dotenv.config();
+     
+   // Variable for storing the connection string from our .env file
+   const connectionString = process.env.ATLAS_URI || '8000';
+   // Creating a new instance of the MongoClient
+   const client = new MongoClient(connectionString);
+     
+   let conn;
+   try {
+     // Connecting to your cluster
+     conn = await client.connect();
+     console.log('Successfully connected to Mongo!');
+   } catch (e) {
+      console.log(e);
+   }
+     
+   const db = conn.db('home_library_catalog');
+   const authorsCollection = await db.collection('authors');
+       
+   const query = { id: Number(req.params.id) };
+
+   const result = await authorsCollection.deleteMany(query);
+   
+   client.close();
+ 
+   if (!result) {
+     const err = new Error('Not Found');
+     err.status = 404;
+     throw err;
+   } else {
+     res.json(result).status(200);
+   }
 });
 
 module.exports = router;

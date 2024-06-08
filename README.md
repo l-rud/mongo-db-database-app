@@ -7,26 +7,19 @@
 **Genres:**    
     
 - GET /api/genres    
-- GET /api/genres/:id   
-- POST /api/genres   
-- PATCH /api/genres/:id    
-- DELETE /api/genres/:id   
-
+- GET /api/genres/id   
+  
 **Books:**     
     
 - GET /api/books   
-- GET /api/books/:id     
-- POST /api/books   
-- PATCH /api/books/:id   
-- DELETE /api/books/:id    
-
+- GET /api/books/id     
+  
 **Authors:** 
           
 - GET /api/authors       
-- GET /api/authors/:id     
-- POST /api/authors     
-- PATCH /api/authors/:id    
-- DELETE /api/authors/:id     
-      
-    
+- GET /api/authors/id     
+- POST /api/authors   
+- PATCH /api/authors/id    
+- DELETE /api/authors/id     
+        
 The application uses port 3000.      
